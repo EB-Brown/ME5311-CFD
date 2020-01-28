@@ -152,6 +152,15 @@ if __name__ == "__main__":
     # Calculate errors
     results.loc[:, 'errors'] = abs(results.numerical - analytic_answer)
 
+    # Unpack slope values
+    error_1, error_2 = results.errors.iloc[0], results.errors.iloc[-1]
+    sample_1, sample_2 = results.samples.iloc[0], results.samples.iloc[-1]
+
+    # Calculate convergence rate
+    convergence_rate = (error_2 - error_1) / (sample_2 - sample_1)
+
+    print(f"In this trial, the convergence rate was {convergence_rate}")
+
     # Initialize convergence plot
     fig, ax = plt.subplots()
     ax.set_position([.2, .125, .7, .8])
@@ -160,18 +169,9 @@ if __name__ == "__main__":
     ax.loglog(results.samples, results.errors, color='black', marker='o')
 
     # Insert plot labels
-    ax.set_title("Residual Convergence")
+    ax.set_title(f"Residual Convergence - {convergence_rate}")
     ax.set_xlabel('Samples (N)')
     ax.set_ylabel('Residual Error |numerical - analytical|')
 
     # Save figure
     fig.savefig(output_dir / 'convergence_plot.png')
-
-    error_1, error_2 = results.errors.iloc[0], results.errors.iloc[-1]
-    sample_1, sample_2 = results.samples.iloc[0], results.samples.iloc[-1]
-
-    convergence_rate = (error_2 - error_1) / (sample_2 - sample_1)
-
-    print(f"In this trial, the convergence rate was {convergence_rate}")
-
-    print(results)
