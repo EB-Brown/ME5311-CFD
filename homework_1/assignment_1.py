@@ -169,7 +169,7 @@ if __name__ == "__main__":
     ax.loglog(results.samples, results.errors, color='black', marker='o')
 
     # Insert plot labels
-    ax.set_title(f"Residual Convergence - {convergence_rate}")
+    ax.set_title(f"Residual Convergence: Convergence Rate = {round(convergence_rate,7)}")
     ax.set_xlabel('Samples (N)')
     ax.set_ylabel('Residual Error |numerical - analytical|')
 
