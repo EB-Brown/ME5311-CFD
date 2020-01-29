@@ -3,6 +3,7 @@ from collections import namedtuple
 from pathlib import Path
 import math as m
 
+from scipy import stats
 from multiprocessing import Pool
 import pandas as pd
 import numpy as np
@@ -127,8 +128,10 @@ def execute_monte_carlo(size: REAL) -> float:
 
 def process_sample_size(size: int) -> Result:
     n_pairs = get_pairs(size)
-    fig, _ = create_plot(n_pairs)
-    fig.savefig(output_dir / f"monte_carlo_plot_{size}_samples.png")
+
+    if not size % 250:
+        fig, _ = create_plot(n_pairs)
+        fig.savefig(output_dir / f"monte_carlo_plot_{size}_samples.png")
 
     return Result(monte_carlo_method(n_pairs), size)
 
@@ -147,31 +150,61 @@ if __name__ == "__main__":
 
     # Process multiple sample sizes
     pool = Pool(4)
-    results = pd.DataFrame(pool.map(process_sample_size, [100, 1000]))
+    results = pd.DataFrame(
+        pool.map(
+            process_sample_size,
+            [5 * i for i in range(201) if i]  # [200 * i for i in range(201) if i]
+        )
+    )
 
     # Calculate errors
     results.loc[:, 'errors'] = abs(results.numerical - analytic_answer)
 
-    # Unpack slope values
-    error_1, error_2 = results.errors.iloc[0], results.errors.iloc[-1]
-    sample_1, sample_2 = results.samples.iloc[0], results.samples.iloc[-1]
-
     # Calculate convergence rate
-    convergence_rate = (error_2 - error_1) / (sample_2 - sample_1)
+    convergence_rate, intercept, *_ = \
+        stats.linregress(results.samples, results.errors)
 
+
+    def fitting(x: float) -> float:
+        """Linear regression fitting of the residuals"""
+        return convergence_rate * x + intercept
+
+
+    # Calculate linear fit points
+    linear_fit = pd.DataFrame([
+        {"x": x, "y": fitting(x)} for x in
+        range(
+            int(results['samples'].min()),
+            int(results['samples'].max()),
+            results['samples'].max() // 200
+        )
+    ])
+
+    convergence_rate = abs(round(convergence_rate, 9))
     print(f"In this trial, the convergence rate was {convergence_rate}")
 
     # Initialize convergence plot
-    fig, ax = plt.subplots()
-    ax.set_position([.2, .125, .7, .8])
+    fig, ax = plt.subplots(figsize=(8, 4.8))
+    ax.set_position([.15, .14, .575, .78])
 
     # Plot residuals
-    ax.loglog(results.samples, results.errors, color='black', marker='o')
+    experiment = ax.loglog(
+        results.samples, results.errors, color='red', marker='x', ls=''
+    )
+    linear_fit = ax.loglog(linear_fit.x, linear_fit.y, color='black', ls='-')
 
     # Insert plot labels
-    ax.set_title(f"Residual Convergence: Convergence Rate = {round(convergence_rate,7)}")
-    ax.set_xlabel('Samples (N)')
-    ax.set_ylabel('Residual Error |numerical - analytical|')
+    ax.set_title(f"Residual Convergence: Convergence Rate = {convergence_rate}")
+    ax.set_xlabel('Samples (log scale)\n(N)')
+    ax.set_ylabel('Residual Error (log scale)\n|numerical - analytical|')
+
+    # insert plot legend
+    plt.legend(
+        [linear_fit[0], experiment[0]],
+        ['Linear Regression', "Experiment Residuals"],
+        loc='upper left',
+        bbox_to_anchor=(1, 0.65),
+    )
 
     # Save figure
     fig.savefig(output_dir / 'convergence_plot.png')
