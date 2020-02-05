@@ -174,5 +174,5 @@ if __name__ == '__main__':
     # Save figure
     output_dir = Path(__file__).parent / 'plots'
     output_dir.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_dir / 'convergence_plot.png')
+    fig.savefig(output_dir / 'Q1_convergence_plot.png')
     plt.show(fig)
