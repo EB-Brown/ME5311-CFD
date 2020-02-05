@@ -153,7 +153,8 @@ if __name__ == "__main__":
     results = pd.DataFrame(
         pool.map(
             process_sample_size,
-            [5 * i for i in range(201) if i]  # [200 * i for i in range(201) if i]
+            [int(x) for x in np.logspace(1,5)]
+            # [5 * i for i in range(1001) if i]  # [200 * i for i in range(201) if i]
         )
     )
 
@@ -207,4 +208,4 @@ if __name__ == "__main__":
     )
 
     # Save figure
-    fig.savefig(output_dir / 'convergence_plot.png')
+    fig.savefig(output_dir / 'Q1_convergence_plot.png')
