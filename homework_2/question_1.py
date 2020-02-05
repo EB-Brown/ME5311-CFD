@@ -4,6 +4,7 @@ from pathlib import Path
 
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+import pandas as pd
 
 Point = namedtuple("Point", ['x', 'y'])
 
@@ -130,14 +131,14 @@ if __name__ == '__main__':
     for x in range(1, 101):
         number_of_points = 150 * x
 
+        numerical_solver = calc_array(
+            number_of_points, initial_condition, end_time=3
+        )
+        exact = exact_array(number_of_points, start_time=2, end_time=3)
+
         p_norms['number_of_points'].append(number_of_points)
         p_norms['p-norms'].append(
-            p_norm(
-                numerical=calc_array(
-                    number_of_points, initial_condition, end_time=3
-                ),
-                exact=exact_array(number_of_points, start_time=2, end_time=3),
-            )
+            p_norm(numerical=numerical_solver, exact=exact)
         )
 
     (a, convergence_rate), *_ = curve_fit(
@@ -183,4 +184,38 @@ if __name__ == '__main__':
     output_dir = Path(__file__).parent / 'plots'
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'Q1_convergence_plot.png')
-    plt.show(fig)
+
+    """Solver Plot"""
+    # Initialize solver plot
+    fig, ax = plt.subplots(figsize=(8, 4.8))
+    ax.set_position([.15, .14, .575, .78])
+
+    # Reformat arrays
+    numerical_solver = pd.DataFrame(numerical_solver)
+    exact = pd.DataFrame(exact)
+
+    # Plot arrays
+    exact_line, *_ = ax.plot(exact.x, exact.y, color='black')
+    numerical, *_ = ax.plot(
+        numerical_solver.x, numerical_solver.y, color='red', ls='--'
+    )
+
+    # Insert plot labels
+    ax.set_title(f"Numerical vs Exact Solution")
+    ax.set_xlabel('X Value')
+    ax.set_ylabel('Y Value')
+
+    # insert plot legend
+    plt.legend(
+        [numerical, exact_line],
+        ["Numerical Solution", "Exact Solution"],
+        loc='upper left',
+        bbox_to_anchor=(1, 0.65),
+    )
+
+    # Save figure
+    output_dir = Path(__file__).parent / 'plots'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_dir / 'Q1_numerical_vs_exact.png')
+
+    fig, ax = plt.subplots()
