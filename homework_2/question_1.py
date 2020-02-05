@@ -13,7 +13,7 @@ def runge_kutta(func: Callable, initial: float, dt: float) -> float:
     Runge-Kutta numerical solver.
 
     :param func: First order differential equation
-    :param initial: Initial condition f(0)
+    :param initial: Initial condition
     :param dt: Time step
     :return: Numerical approximation of the next step
     """
@@ -113,6 +113,14 @@ def p_norm(numerical: List[Point], exact: List[Point], order: int = 2) -> float:
 
 
 def convergence_fit(num_points: int, a: float, k: float) -> float:
+    """
+    Calculate convergence points
+
+    :param num_points: Number of samples used
+    :param a: Constant multiplier
+    :param k: Convergence rate
+    :return: Lorenzo Gradient
+    """
     return a * num_points ** (-k)
 
 
