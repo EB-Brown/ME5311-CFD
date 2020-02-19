@@ -121,6 +121,9 @@ if __name__ == '__main__':
         dt=dt,
     )
 
+    stable_output = OUTPUT_DIR / 'stable_solution'
+    stable_output.mkdir(parents=True, exist_ok=True)
+
     for t in np.arange(0, 2, 0.25):
         t = np.where(solution.columns >= t)[0][0]
         fig, ax = line_plot(
@@ -128,20 +131,22 @@ if __name__ == '__main__':
             y=solution.iloc[:, t],
             title=f"t = {solution.columns[t]}"
         )
-        fig.savefig(OUTPUT_DIR / f"Solution Plot - t_{t}.png")
+        fig.savefig(stable_output / f"Solution Plot - t_{t}.png")
 
     fig, ax = line_plot(
         x=solution.columns,
         y=solution.iloc[0],
         title="Initial Condition: x = 0"
     )
-    fig.savefig(OUTPUT_DIR / "Initial Condition - x_0.png")
+    fig.savefig(stable_output / "Initial Condition - x_0.png")
 
     fig, ax = contour_plot(
         solution,
         title=f"Velocity Propagation: dx = {dx}, dt = {dt}"
     )
-    fig.savefig(OUTPUT_DIR / "Contour Plot - Stable Solution.png")
+    fig.savefig(stable_output / "Contour Plot.png")
+
+    """Unstable Analysis"""
 
     unstable = run_simple_convection(
         x_domain=(0, 1),
@@ -150,11 +155,22 @@ if __name__ == '__main__':
         dt=dt * 1.1,
     )
 
+    unstable_output = OUTPUT_DIR / 'unstable_solution'
+    unstable_output.mkdir(parents=True, exist_ok=True)
+
+    for t in np.arange(0, 2, 0.25):
+        t = np.where(unstable.columns >= t)[0][0]
+        fig, ax = line_plot(
+            x=unstable.index,
+            y=unstable.iloc[:, t],
+            title=f"t = {unstable.columns[t]}"
+        )
+        fig.savefig(unstable_output / f"Solution Plot - t_{t}.png")
+
     fig, ax = contour_plot(
         unstable,
         title=f"Velocity Propagation: dx = {dx}, dt = {dt * 1.1}"
     )
-    fig.savefig(OUTPUT_DIR / "Contour Plot - Unstable Solution.png")
-
+    fig.savefig(unstable_output / "Contour Plot.png")
 
     print()
