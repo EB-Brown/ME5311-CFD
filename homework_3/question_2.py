@@ -43,11 +43,10 @@ def three_point_stencil(u_array: np.array, dx: float) -> np.array:
     :param dx: time step
     :return: Approximated second derivative array
     """
-    u_i_minus_1 = u_array
-    u_array = list(u_array)
-    u_i = np.array(u_array[1:] + [np.nan])
-    u_i_plus_1 = np.array(u_array[2:] + [np.nan] * 2)
-    return np.array(list((u_i_minus_1 - 2 * u_i + u_i_plus_1) / dx ** 2)[:-2])
+    u_i_minus_1 = u_array[:-2]
+    u_i = u_array[1:-1]
+    u_i_plus_1 = u_array[2:]
+    return (u_i_minus_1 - 2 * u_i + u_i_plus_1) / (dx ** 2)
 
 
 def convergence_fit(num_points: int, a: float, k: float) -> float:
@@ -97,8 +96,9 @@ def execute_study(dx: float, interval_end: float) -> Dict[str, np.array]:
 
     # Spectral approximation
     fft = np.fft.fft(u_exact)
-    kx = n_array * 2 * np.pi / (interval_end * number_of_points)
-    u_ddot_fft = -(kx ** 2) * np.fft.ifft(fft).real + 2
+    # kx = n_array * 2 * np.pi / (interval_end * number_of_points)
+    kx = np.fft.fftfreq(n=fft.size, d=dx)
+    u_ddot_fft = np.fft.ifft(-(kx ** 2) * fft).real
 
     return {'x': x, 'exact': u_ddot, 'stencil': three_point, 'fft': u_ddot_fft}
 
@@ -116,7 +116,7 @@ def p_norm(x_array: np.array,
     :param order: Order of the p-norm summation
     :return: Norm Error
     """
-    dt = (x_array[-1] - x_array[0]) / len(exact)
+    dt = (x_array[-1] - x_array[0]) / len(x_array)
     errors = []
     for n, (aprx, exct) in enumerate(zip(numerical, exact)):
         errors.append(abs(aprx ** n - exct ** n) ** order)
@@ -168,6 +168,7 @@ def generate_test_plot(x: np.array, u: np.array, fit: np.array, method: str):
     ax.set_title(title + f": dx={dt}")
     ax.set_ylabel('d2u/dx2')
     ax.set_xlabel('X position')
+    ax.set_ylim(-2.5, 2.5)
 
     plt.legend(
         [exact, fit],
@@ -237,7 +238,7 @@ if __name__ == '__main__':
         norms['stencil'].append({
             'num_points': num_points,
             'dt': dt,
-            'p_norm': p_norm(t['x'], t['stencil'], t['exact'])
+            'p_norm': p_norm(t['x'][1:-1], t['stencil'], t['exact'][1:-1])
         })
 
     # Plot convergence
