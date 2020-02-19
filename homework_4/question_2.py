@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Union
 from functools import partial
 from pathlib import Path
 
@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 DOMAIN = Tuple[float, float]
+ARRAY = Union[np.array, pd.Series]
 
 OUTPUT_DIR = Path(__file__).parent / 'plot'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -91,7 +92,15 @@ def run_simple_convection(x_domain: DOMAIN,
     return output.loc[output.index <= t_end]
 
 
-def line_plot(x, y, title):
+def line_plot(x: ARRAY, y: ARRAY, title: str):
+    """
+    A function for generating standard plots for homework 4
+
+    :param x: X array
+    :param y: Y array
+    :param title: Plot title
+    :return: Figure and axis object
+    """
     fig, ax = plt.subplots(figsize=(8, 4.8))
     ax.set_position([.15, .14, .575, .78])
     ax.plot(x, y)
@@ -102,6 +111,13 @@ def line_plot(x, y, title):
 
 
 def contour_plot(df: pd.DataFrame, title: str):
+    """
+    Generate a contour plot of the solution for the convection equation
+
+    :param df: Resulting values for the convection equation
+    :param title: Title of the plot
+    :return: Figure and axis object
+    """
     fig, ax = plt.subplots(figsize=(8, 4.8))
     ax.set_position([.15, .14, .575, .78])
     for plot_grain in reversed(range(1000)):
@@ -147,7 +163,7 @@ if __name__ == '__main__':
             y=solution.iloc[:, t],
             title=f"t = {timestamp}"
         )
-        ts = str(timestamp).replace(".", "_")
+        ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(stable_output / f"Solution Plot - t_{ts}.png")
 
     fig, ax = line_plot(
@@ -163,8 +179,9 @@ if __name__ == '__main__':
     )
     fig.savefig(stable_output / "Contour Plot.png")
 
-    """Unstable Analysis"""
-
+    """
+    Unstable Analysis
+    """
     unstable = run_simple_convection(
         x_domain=(0, 1),
         t_domain=(0, 2),
@@ -175,7 +192,7 @@ if __name__ == '__main__':
     unstable_output = OUTPUT_DIR / 'question_2_unstable'
     unstable_output.mkdir(parents=True, exist_ok=True)
 
-    for t in np.arange(0, 2, 0.25):
+    for t in np.arange(0, 2.1, 0.25):
         t = np.where(unstable.columns >= t)[0][0]
         timestamp = solution.columns[t]
 
@@ -185,7 +202,7 @@ if __name__ == '__main__':
             title=f"t = {unstable.columns[t]}"
         )
 
-        ts = str(timestamp).replace(".", "_")
+        ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(unstable_output / f"Solution Plot - t_{ts}.png")
 
     fig, ax = contour_plot(

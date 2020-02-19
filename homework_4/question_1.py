@@ -1,11 +1,22 @@
+from typing import Union
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+ARRAY = Union[np.array, pd.Series]
 
-def line_plot(x, y, title):
+
+def line_plot(x: ARRAY, y: ARRAY, title: str):
+    """
+    A function for generating standard plots for homework 4
+
+    :param x: X array
+    :param y: Y array
+    :param title: Plot title
+    :return: Figure and axis object
+    """
     fig, ax = plt.subplots(figsize=(8, 4.8))
     ax.set_position([.15, .14, .575, .78])
     ax.plot(x, y)
@@ -16,6 +27,13 @@ def line_plot(x, y, title):
 
 
 def contour_plot(df: pd.DataFrame, title: str):
+    """
+    Generate a contour plot of the solution for the convection equation
+
+    :param df: Resulting values for the convection equation
+    :param title: Title of the plot
+    :return: Figure and axis object
+    """
     fig, ax = plt.subplots(figsize=(8, 4.8))
     ax.set_position([.15, .14, .575, .78])
     for plot_grain in reversed(range(1000)):
@@ -39,7 +57,16 @@ def contour_plot(df: pd.DataFrame, title: str):
     return fig, ax
 
 
-def u_func(x: np.array, t: np.array):
+def u_func(x: Union[np.array, float], t: Union[np.array, float]) -> np.array:
+    """
+    The exact solution to question 1 on the homework.
+
+    :param x: Either a scalar or vector for input x values
+    :param t: Either a scalar or vector for input t values
+    :return:
+        The resulting array with the appropriate vector shape given the
+        input shape
+    """
     theta = x - 2 * t
     theta = np.where((0 < theta) & (theta <= 1), theta, 2 - theta)
     return np.where((0 < theta) & (theta <= 2), theta, 0)
@@ -64,7 +91,7 @@ if __name__ == "__main__":
             y=solution.iloc[:, t],
             title=f"t = {solution.columns[t]}"
         )
-        ts = str(timestamp).replace(".", "_")
+        ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(question_1 / f"Line Plot - t_{ts}.png")
 
     fig, ax = contour_plot(
