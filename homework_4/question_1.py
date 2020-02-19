@@ -93,9 +93,11 @@ if __name__ == "__main__":
         )
         ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(question_1 / f"Line Plot - t_{ts}.png")
+        plt.close(fig)
 
     fig, ax = contour_plot(
         solution,
         title=f"Velocity Propagation: dx = {0.01}, dt = {0.01}"
     )
     fig.savefig(question_1 / "Contour Plot.png")
+    plt.close(fig)

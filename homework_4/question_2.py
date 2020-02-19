@@ -165,6 +165,7 @@ if __name__ == '__main__':
         )
         ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(stable_output / f"Solution Plot - t_{ts}.png")
+        plt.close(fig)
 
     fig, ax = line_plot(
         x=solution.columns,
@@ -172,12 +173,14 @@ if __name__ == '__main__':
         title="Initial Condition: x = 0"
     )
     fig.savefig(stable_output / "Initial Condition - x_0.png")
+    plt.close(fig)
 
     fig, ax = contour_plot(
         solution,
         title=f"Velocity Propagation: dx = {dx}, dt = {round(dt, 5)}"
     )
     fig.savefig(stable_output / "Contour Plot.png")
+    plt.close(fig)
 
     """
     Unstable Analysis
@@ -204,11 +207,11 @@ if __name__ == '__main__':
 
         ts = str(round(timestamp, 1)).replace(".", "_")
         fig.savefig(unstable_output / f"Solution Plot - t_{ts}.png")
+        plt.close(fig)
 
     fig, ax = contour_plot(
         unstable,
         title=f"Velocity Propagation: dx = {dx}, dt = {round(dt * 1.1, 5)}"
     )
     fig.savefig(unstable_output / "Contour Plot.png")
-
-    print()
+    plt.close(fig)
