@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     fig, ax = contour_plot(
         solution,
-        title=f"Velocity Propagation: dx = {dx}, dt = {dt}"
+        title=f"Velocity Propagation: dx = {dx}, dt = {round(dt, 5)}"
     )
     fig.savefig(stable_output / "Contour Plot.png")
 
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
     fig, ax = contour_plot(
         unstable,
-        title=f"Velocity Propagation: dx = {dx}, dt = {dt * 1.1}"
+        title=f"Velocity Propagation: dx = {dx}, dt = {round(dt * 1.1, 5)}"
     )
     fig.savefig(unstable_output / "Contour Plot.png")
 
