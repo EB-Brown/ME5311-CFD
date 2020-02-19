@@ -42,6 +42,16 @@ def run_simple_convection(x_domain: DOMAIN,
                           t_domain: DOMAIN,
                           dx: float,
                           dt: float) -> pd.DataFrame:
+    """
+    Run a simulation of the convection problem presented in question 2 of
+    homework 4.
+
+    :param x_domain: Lower and upper limits of the space domain
+    :param t_domain: Lower and upper limits of the time domain
+    :param dx: Step along the x component
+    :param dt: Time step
+    :return: A DataFrame of results from the simulation
+    """
     t_start, t_end = t_domain
     t_array = np.arange(t_start, t_end + dt, dt)[1:]  # Skip initial condition
     u_x0 = np.sin(t_array * 4)  # u(t, x=0)
@@ -71,10 +81,14 @@ def run_simple_convection(x_domain: DOMAIN,
         if t >= t_end:
             break
 
+    # Format data types
     output = pd.DataFrame(output)
+
+    # Set index to x values
     output.index = x_array[:len(output)]
 
-    return output.loc[output.index <= 1]
+    # Return only values within the
+    return output.loc[output.index <= t_end]
 
 
 def line_plot(x, y, title):
@@ -124,14 +138,17 @@ if __name__ == '__main__':
     stable_output = OUTPUT_DIR / 'stable_solution'
     stable_output.mkdir(parents=True, exist_ok=True)
 
-    for t in np.arange(0, 2, 0.25):
+    for t in np.arange(0, 2.01, 0.25):
         t = np.where(solution.columns >= t)[0][0]
+        timestamp = solution.columns[t]
+
         fig, ax = line_plot(
             x=solution.index,
             y=solution.iloc[:, t],
-            title=f"t = {solution.columns[t]}"
+            title=f"t = {timestamp}"
         )
-        fig.savefig(stable_output / f"Solution Plot - t_{t}.png")
+        ts = str(timestamp).replace(".", "_")
+        fig.savefig(stable_output / f"Solution Plot - t_{ts}.png")
 
     fig, ax = line_plot(
         x=solution.columns,
@@ -160,12 +177,16 @@ if __name__ == '__main__':
 
     for t in np.arange(0, 2, 0.25):
         t = np.where(unstable.columns >= t)[0][0]
+        timestamp = solution.columns[t]
+
         fig, ax = line_plot(
             x=unstable.index,
             y=unstable.iloc[:, t],
             title=f"t = {unstable.columns[t]}"
         )
-        fig.savefig(unstable_output / f"Solution Plot - t_{t}.png")
+
+        ts = str(timestamp).replace(".", "_")
+        fig.savefig(unstable_output / f"Solution Plot - t_{ts}.png")
 
     fig, ax = contour_plot(
         unstable,
