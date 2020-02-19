@@ -47,7 +47,7 @@ def u_func(x: np.array, t: np.array):
 
 if __name__ == "__main__":
     x_array = np.arange(-0.5, 4.5, 0.01)
-    t_array = np.arange(0, 2, 0.01)
+    t_array = np.arange(0, 2.01, 0.01)
     solution = pd.DataFrame({t: u_func(x_array, t) for t in t_array})
     solution.index = x_array
 
@@ -55,14 +55,17 @@ if __name__ == "__main__":
     question_1 = OUTPUT_DIR / 'question_1'
     question_1.mkdir(parents=True, exist_ok=True)
 
-    for t in np.arange(0, 2, 0.25):
+    for t in np.arange(0, 2.01, 0.25):
         t = np.where(solution.columns >= t)[0][0]
+        timestamp = solution.columns[t]
+
         fig, ax = line_plot(
             x=solution.index,
             y=solution.iloc[:, t],
             title=f"t = {solution.columns[t]}"
         )
-        fig.savefig(question_1 / f"Line Plot - t_{t}.png")
+        ts = str(timestamp).replace(".", "_")
+        fig.savefig(question_1 / f"Line Plot - t_{ts}.png")
 
     fig, ax = contour_plot(
         solution,
