@@ -135,7 +135,7 @@ if __name__ == '__main__':
         dt=dt,
     )
 
-    stable_output = OUTPUT_DIR / 'stable_solution'
+    stable_output = OUTPUT_DIR / 'question_2_stable'
     stable_output.mkdir(parents=True, exist_ok=True)
 
     for t in np.arange(0, 2.01, 0.25):
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         dt=dt * 1.1,
     )
 
-    unstable_output = OUTPUT_DIR / 'unstable_solution'
+    unstable_output = OUTPUT_DIR / 'question_2_unstable'
     unstable_output.mkdir(parents=True, exist_ok=True)
 
     for t in np.arange(0, 2, 0.25):
