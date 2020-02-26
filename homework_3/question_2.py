@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import scipy
 
 OUTPUT_DIR = Path(__file__).parent / 'plot'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -85,7 +86,8 @@ def execute_study(dx: float, interval_end: float) -> Dict[str, np.array]:
     # Set up
     number_of_points = round(interval_end / dx)
     x = np.arange(0, interval_end, dx)
-    n_array = np.array(number_of_points)
+    n_array = np.arange(number_of_points // 2)
+    n_array = np.arange(-1 * number_of_points // 2 + 1, -1)
 
     # Exact solutions
     u_exact = u_x(x)
@@ -95,10 +97,15 @@ def execute_study(dx: float, interval_end: float) -> Dict[str, np.array]:
     three_point = three_point_stencil(u_exact, dx)
 
     # Spectral approximation
-    fft = np.fft.fft(u_exact)
-    # kx = n_array * 2 * np.pi / (interval_end * number_of_points)
-    kx = np.fft.fftfreq(n=fft.size, d=dx)
-    u_ddot_fft = np.fft.ifft(-(kx ** 2) * fft).real
+    fft = scipy.fft.fft(u_exact)
+    kx = np.zeros(number_of_points)
+    wave_length = 2 * np.pi / interval_end
+    kx[:number_of_points // 2 + 1] = \
+        np.arange(number_of_points // 2 + 1) * wave_length
+    kx[number_of_points // 2 + 1:] = \
+        np.arange(-1 * number_of_points // 2 + 1, 0) * wave_length
+    # kx = scipy.fft.fftfreq(n=fft.size, d=dx)
+    u_ddot_fft = scipy.fft.ifft(-(kx ** 2) * fft).real
 
     return {'x': x, 'exact': u_ddot, 'stencil': three_point, 'fft': u_ddot_fft}
 
@@ -242,5 +249,5 @@ if __name__ == '__main__':
         })
 
     # Plot convergence
-    for method, norms in norms.items():
-        generate_convergence_plots(pd.DataFrame(norms), method)
+    # for method, norms in norms.items():
+    #     generate_convergence_plots(pd.DataFrame(norms), method)
