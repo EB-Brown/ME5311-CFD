@@ -13,17 +13,14 @@ def get_dct_solution(start, end, dx):
     x_array = np.arange(start, end, dx)
     x_len = len(x_array)
     d = d_x(x_array)
+
     cos_trans = fftpack.dct(d, norm='ortho')  # ortho = MATLAB func
     denominator = (2 * np.cos(np.pi * (np.arange(x_len) + 1) / x_len) - 2)
     p_k = (dx ** 2) * cos_trans / denominator
-    idx = ~np.isinf(p_k)
+
     keep = 0.4
-    answer = fftpack.idct(p_k[idx][:int(x_len * keep)], norm='ortho')
-    print(max(answer))
-    plt.plot(x_array[idx][:int(x_len * keep)] / keep, answer)
-    plt.show()
-    print()
-    # return x_array, fftpack.idct(dx ** 2 * fftpack.dct(d_x(x_array)) / (2 * np.cos(np.pi * np.arange(x_len) / x_len) - 2))
+    answer = fftpack.idct(p_k[:int(x_len * keep)], norm='ortho')
+    return x_array[:int(x_len * keep)] / keep, answer
 
 
 if __name__ == "__main__":
