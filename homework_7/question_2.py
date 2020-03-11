@@ -47,11 +47,7 @@ def p_norm(numerical: np.ndarray,
     :param order: Order of the p-norm summation
     :return: Norm Error
     """
-    errors = [
-        abs(aprx ** (1+n) - exct ** (1+n)) ** order
-        for n, (aprx, exct) in enumerate(zip(numerical, exact))
-    ]
-    return (dx * sum(errors)) ** (1 / order)
+    return (dx * sum(abs(numerical - exact) ** order)) ** (1 / order)
 
 
 def convergence_fit(num_points: int, a: float, k: float) -> float:
@@ -71,13 +67,13 @@ if __name__ == "__main__":
     output_dir.mkdir(parents=True, exist_ok=True)
 
     p_norms = {}
-    for magnitude in range(2, 5):
+    for magnitude in range(1, 5):
         for i in range(1, 11):
             step = 1 / (i * 10 ** magnitude)
             x_vals = np.arange(0, 2, step)
             num_pressure = get_dct_solution(x_vals, step)
             exact_pressure = exact_solution(x_vals)
-            error_norm = p_norm(num_pressure, exact_pressure, step, 1)
+            error_norm = p_norm(num_pressure, exact_pressure, step)
             p_norms[step] = error_norm
 
         fig, ax = plt.subplots(figsize=(8, 4.8))
@@ -96,7 +92,7 @@ if __name__ == "__main__":
             loc='upper left',
             bbox_to_anchor=(1, 0.65),
         )
-        fig.savefig(output_dir / f'dct_{int(1 / step)}_points.png')
+        fig.savefig(output_dir / f'dct_{round(1 / step)}_points.png')
 
     p_norms = pd.Series(p_norms).dropna().sort_index()
     (a, convergence_rate), *_ = curve_fit(
@@ -115,7 +111,7 @@ if __name__ == "__main__":
     convergence_rate = round(convergence_rate, 3)
     ax.set_title(f"Residual Convergence: Convergence Rate = {convergence_rate}")
     ax.set_xlabel('Step (Delta X)\nlog scale')
-    ax.set_ylabel('1st Order Error Norm (log scale)')
+    ax.set_ylabel('2nd Order Error Norm (log scale)')
 
     plt.legend(
         [residual_fit, experiment],
@@ -125,6 +121,5 @@ if __name__ == "__main__":
     )
 
     fig.savefig(output_dir / 'convergence_plot.png')
-
 
     print()
