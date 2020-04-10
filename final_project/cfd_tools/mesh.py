@@ -1,3 +1,5 @@
+__all__ = ['LinearMesh']
+
 from collections import defaultdict
 
 import numpy as np
@@ -30,9 +32,13 @@ class LinearMesh:
         for parm, domain in parameters.items():
             start = domain.get('start', 0)
             end = domain.get('end', start + 1)
-            step = domain.get('step', (end - start) / 10)
+            step = domain.get('step', 0)
             extended_end = end + step
 
-            array = np.arange(start, extended_end, step)
-            array = array[array <= end]
+            if step:  # Generate an array
+                array = np.arange(start, extended_end, step)
+                array = array[array <= end]
+            else:  # Generate an array with a single value
+                array = np.array([start])
+
             setattr(self, parm, array)
