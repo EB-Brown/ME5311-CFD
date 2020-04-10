@@ -14,7 +14,7 @@ def p_norm(numerical: np.ndarray,
            step_size: float,
            order: int = 2) -> float:
     """
-    Calculate a p_norm of the error.
+    Calculate a p_norm of the error for a 1-D problem.
 
     :param numerical: An array of numerically approximated values
     :param exact: An array of the exact values
