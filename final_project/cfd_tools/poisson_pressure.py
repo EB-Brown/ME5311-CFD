@@ -31,6 +31,7 @@ KMOD_CACHE = {}
 
 
 def _get_k_mod(x_len: float, y_len: float, dx: float, dy: float) -> np.ndarray:
+    """Helper function for calculating the K Mod for FFT integration"""
     # TODO: Fix Caching
     # val_id = (id(arg) for arg in [x_len, y_len, dx, dy])
     # try:  # Pull from the cache to avoid calculating the k mod array again
@@ -38,17 +39,17 @@ def _get_k_mod(x_len: float, y_len: float, dx: float, dy: float) -> np.ndarray:
     # except KeyError:
     #     pass
 
-    return (
-        (2 * np.cos(np.pi * np.arange(x_len) / x_len) - 2) / dx ** 2 +
-        (2 * np.cos(np.pi * np.arange(y_len) / y_len) - 2) / dy ** 2
-    )
+    return sum((
+        (2 * np.cos(np.pi * np.arange(array_len) / array_len) - 2) / step ** 2
+        for array_len, step in [(x_len, dx), (y_len, dy)] if not np.isnan(step)
+    ))
 
 
 def get_dct2_solution(x_array: np.ndarray,
                       y_array: np.ndarray,
                       z_array: np.ndarray) -> np.ndarray:
     """
-
+    Solves the Laplacian equation for a given initial condition.
 
     :param x_array:
         Array of X-values. The array must have constant step distances.
@@ -60,7 +61,7 @@ def get_dct2_solution(x_array: np.ndarray,
     """
     x_len, dx = _get_size(x_array, "x_array")
     y_len, dy = _get_size(y_array, "y_array")
-    cos_trans = fftpack.fft2(z_array).real
+    cos_trans = fftpack.fft2(z_array)
     denominator = _get_k_mod(x_len, y_len, dx, dy)
     p_k = cos_trans / denominator
 
@@ -68,4 +69,4 @@ def get_dct2_solution(x_array: np.ndarray,
     idx = np.isinf(p_k)
     p_k[idx] = 0
 
-    return fftpack.ifft2(p_k).real
+    return fftpack.ifft2(p_k).real / 2

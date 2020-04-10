@@ -27,6 +27,12 @@ def d_x_y(x_array: np.ndarray,
     """
     dd_array = []
     z_array = []
+
+    try:
+        y_array[0]
+    except TypeError:
+        y_array = [y_array]
+
     for y in y_array:
         dd_y_calcs = []
         y_calcs = []
@@ -52,26 +58,30 @@ if __name__ == "__main__":
         os.remove(png)
 
     # Analysis settings
-    l_x = 2
     base_step = 2
-    x_start, x_end = 0, 10
-    y_start, y_end = 0, 10
+    x_start, x_end = 0, 1.5
+    y_start, y_end = 0, 2
+    x_len = x_end - x_start
+    y_len = y_end - y_start
 
     convergence_array = defaultdict(list)
-    exponents = np.arange(2, 10.2, step=0.2)
+    exponents = np.arange(2, 10, step=0.2)
     loops = len(exponents)
-    step_size = exact_solution = mesh = None
+    step_size = exact_solution = mesh = numerical_solution = num_points = None
     for progress, exponent in enumerate(exponents):
-        step_size = 1 / base_step ** exponent
+        num_points = base_step ** exponent
+        x_step_size = x_len / num_points
+        y_step_size = y_len / num_points
+        step_size = 1 / num_points
 
         # Initialize Mesh
         mesh = LinearMesh(
-            x_start=x_start, x_end=x_end, x_step=step_size,
-            y_start=y_start, y_end=y_end, y_step=step_size,
+            x_start=x_start, x_end=x_end, x_step=x_step_size,
+            y_start=y_start, y_end=y_end, y_step=y_step_size,
         )
 
         # Calculate numerical and exact solution
-        second_derivative, exact_solution = d_x_y(mesh.x, mesh.y, l_x)
+        second_derivative, exact_solution = d_x_y(mesh.x, mesh.y, l_x=x_len)
         numerical_solution = get_dct2_solution(
             mesh.x, mesh.y, second_derivative
         )
@@ -83,31 +93,45 @@ if __name__ == "__main__":
         )
 
         # Make a contour plot of numerical solution
-        if not (progress + 1) % 5:
+        if not (progress + 1) % 3 or (progress + 1) == loops:
             fig, ax = plot_contour(
                 x_array=mesh.x,
                 y_array=mesh.y,
                 z_array=numerical_solution,
-                title=f"Numerical Solution - dx=dy=1/{step_size}"
+                title=f"Numerical Solution - dx=dy=1/{num_points}"
             )
 
             fig.savefig(
-                output_plots / f"press_cont_{int(1 / step_size)}_points.png"
+                output_plots / f"press_cont_{int(num_points)}_points.png"
             )
         print(f"Completed progress: {round(100 * (1 + progress) / loops, 3)}%")
 
+    num_points = int(num_points)
     fig, ax = plot_contour(
         x_array=mesh.x,
         y_array=mesh.y,
         z_array=exact_solution,
-        title=f"Exact Solution - dx=dy=1/{step_size}"
+        title=f"Exact Solution - Number of Points = {num_points}"
     )
 
-    fig.savefig(output_plots / f"exact_{round(1 / step_size)}_points.png")
+    fig.savefig(output_plots / f"exact_{num_points}_points.png")
+
+    perc_err = \
+        100 * abs(exact_solution - numerical_solution) / exact_solution.max()
+    resid_title = "Percent Residual Error Solution - Number of Points = {}"
+    fig, ax = plot_contour(
+        x_array=mesh.x,
+        y_array=mesh.y,
+        z_array=perc_err,
+        title=resid_title.format(num_points)
+    )
+
+    fig.savefig(output_plots / f"residuals_{num_points}_points.png")
 
     _, convergence_rate, convergence_fit = get_convergence_fit(
         convergence_array['step_size'], convergence_array['inf_norm'],
     )
+    convergence_rate = round(convergence_rate, 3)
 
     fig, ax = plot_convergence(
         x_array=convergence_array['step_size'],
