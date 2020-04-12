@@ -35,10 +35,11 @@ class LinearMesh:
             step = domain.get('step', 0)
             extended_end = end + step
 
-            if step:  # Generate an array
+            if step != 0:  # Generate an array
                 array = np.arange(start, extended_end, step)
                 array = array[array <= end]
             else:  # Generate an array with a single value
                 array = np.array([start])
 
             setattr(self, parm, array)
+            setattr(self, f"{parm}_step", step)
