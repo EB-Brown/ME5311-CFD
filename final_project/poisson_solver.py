@@ -52,7 +52,7 @@ def d_x_y(x_array: np.ndarray,
 
 
 if __name__ == "__main__":
-    output_plots = Path(__file__).parent / 'plots'
+    output_plots = Path(__file__).parent / 'plots/poisson_solver'
     output_plots.mkdir(parents=True, exist_ok=True)
     for png in output_plots.rglob('*.png'):
         os.remove(png)
