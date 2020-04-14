@@ -45,10 +45,11 @@ print(f"Max V average along x_axis: {y_velocity.values.mean(axis=1).max()}\n")
 deliverable = FluidProfile(x_velocity, y_velocity)
 
 prior_divergence = deliverable.velocity_divergence
-print(prior_divergence.max())
+print(f"Maximum divergence before subtracting pressure {prior_divergence.max()}")
 deliverable.remove_divergence()
 post_divergence = deliverable.velocity_divergence
-print(post_divergence.max())
+print(f"Maximum divergence after subtracting pressure {post_divergence.max()}")
+print()
 
 output_dir = Path(__file__).parent / "plots/divergence_study"
 output_dir.mkdir(parents=True, exist_ok=True)
@@ -61,7 +62,7 @@ fig, ax = plot_contour(
     z_array=prior_divergence,
     title="Divergence Field Prior to Subtracting Pressure",
     x_label="X Domain",
-    y_label="X Domain",
+    y_label="Y Domain",
 )
 fig.savefig(output_dir / "divergence_before_pressure.png")
 
@@ -71,6 +72,28 @@ fig, ax = plot_contour(
     z_array=post_divergence,
     title="Divergence Field After Subtracting Pressure",
     x_label="X Domain",
-    y_label="X Domain",
+    y_label="Y Domain",
 )
 fig.savefig(output_dir / "divergence_after_pressure.png")
+
+average = post_divergence.mean()
+abs_average = abs(post_divergence).mean()
+stndrd = np.std(post_divergence)
+max_val = post_divergence.max()
+min_val = post_divergence.min()
+comp_precision = np.isclose(post_divergence, 0).sum() \
+                 / post_divergence.shape[0] ** 2  # Square grid
+
+print(f"""
+Unfortunately the python contour plot is not able to generate a plot indicating 
+regions where the divergence is less than computer precision but below is a list 
+of statistics regarding the divergence after subtracting the pressure gradient:
+\n
+Average Value = {average}\n
+Absolute Average = {abs_average}\n
+Standard Deviation = {stndrd}\n
+Max Value =  {max_val}\n
+Min Value =  {min_val}\n
+Percentage of points close to computer precision = 
+{round(100 * comp_precision, 3)}%\n
+""")
