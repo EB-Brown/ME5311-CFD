@@ -18,7 +18,7 @@ class Field:
     _dx: np.ndarray = None
 
     def __init__(self,
-                 mesh: LinearMesh,
+                 mesh: np.ndarray,
                  values: LinearMesh):
         """"""
         self.values = values
@@ -27,25 +27,15 @@ class Field:
     @property
     def dx(self) -> np.ndarray:
         if self._dx is None:
-            dx = (self.values[:, 1:] - self.values[:, :-1]) / self.mesh.x_step
-
-            # Dropping the bottom row of the grid
-            # The bottom row has partial-X along bottom domain
-            # Dropping j=-1
-            self._dx = dx[:-1]
-
+            self._dx = \
+                (self.values[:, 1:] - self.values[:, :-1]) / self.mesh.x_step
         return self._dx
 
     @property
     def dy(self) -> np.ndarray:
         if self._dy is None:
-            dy = (self.values[:-1, :] - self.values[1:, :]) / self.mesh.y_step
-
-            # Dropping the left column from the grid
-            # The left column has partial-Y along left domain
-            # Dropping i=-1
-            self._dy = dy[:, 1:]
-
+            self._dy = \
+                (self.values[:-1, :] - self.values[1:, :]) / self.mesh.y_step
         return self._dy
 
     @property
@@ -63,38 +53,18 @@ class Field:
 
 
 class FluidProfile(ABC):
-    mesh: LinearMesh
     _x_velocity: Field
     _y_velocity: Field
     __pressure: Field = None
 
-    def __init__(self,
-                 x_velocity: np.ndarray,
-                 y_velocity: np.ndarray,
-                 mesh: LinearMesh):
+    def __init__(self, x_velocity: Field, y_velocity: Field):
         """"""
-        if x_velocity.shape != y_velocity.shape:
-            raise ValueError(
-                "Velocity components do not have matching shapes:\n"
-                f"x_velocity.shape: {x_velocity.shape}\n"
-                f"y_velocity.shape: {y_velocity.shape}"
-            )
-
-        self._x_velocity: Field = Field(x_velocity, mesh)
-        self._y_velocity: Field = Field(y_velocity, mesh)
-        self.mesh = mesh
+        self._x_velocity: Field = x_velocity
+        self._y_velocity: Field = y_velocity
 
     @property
     def velocity_divergence(self) -> np.ndarray:
         return self._x_velocity.dx + self._y_velocity.dy
-
-    @property
-    def x(self) -> np.ndarray:
-        return self.mesh.x
-
-    @property
-    def y(self) -> np.ndarray:
-        return self.mesh.y
 
     @property
     def pressure_x_domain(self) -> np.ndarray:
@@ -122,55 +92,39 @@ class FluidProfile(ABC):
     @property
     def x_velocity(self) -> np.ndarray:
         """check divergence, correct, then send"""
-        divergence = self.velocity_divergence
-        if not np.isclose(divergence.max(), 0):
-            self._remove_divergence()
         return self._x_velocity.values
 
     @property
     def y_velocity(self) -> np.ndarray:
         """check divergence, correct, then send"""
-        divergence = self.velocity_divergence
-        if not np.isclose(divergence.max(), 0):
-            self._remove_divergence()
         return self._y_velocity.values
 
-    def _remove_divergence(self):
+    def remove_divergence(self):
         # Get velocity profiles
         x_velocity = self._x_velocity.values
         y_velocity = self._y_velocity.values
 
         # Remove divergence
-        x_velocity[1:-1, 1:-1] -= self._pressure.dx
-        y_velocity[1:-1, 1:-1] -= self._pressure.dy
+        x_velocity[:, 1:-1] -= self._pressure.dx
+        y_velocity[1:-1] -= self._pressure.dy
 
         # Assert boundaries
         x_velocity, y_velocity = \
             self._assert_boundary_conditions(x_velocity, y_velocity)
 
         # Update velocity profiles
-        self._x_velocity = Field(self._x_velocity.mesh, x_velocity)
-        self._y_velocity = Field(self._y_velocity.mesh, y_velocity)
+        self._x_velocity = Field(mesh=self._x_velocity.mesh, values=x_velocity)
+        self._y_velocity = Field(mesh=self._y_velocity.mesh, values=y_velocity)
 
     def _assert_boundary_conditions(self,
                                     x_velocity: np.ndarray,
                                     y_velocity: np.ndarray) -> VELOCITY_TUPLES:
         """"""
-        # Top domain
-        x_velocity[0] = 0
-        y_velocity[0] = 0
+        y_velocity[:2] = 0
+        y_velocity[:-2] = 0
 
-        # Bottom domain
-        x_velocity[-1] = 0
-        y_velocity[-1] = 0
-
-        # Left domain
-        x_velocity[:, 0] = 0
-        y_velocity[:, 0] = 0
-
-        # Right domain
-        x_velocity[:, -1] = 0
-        y_velocity[:, -1] = 0
+        x_velocity[:, :2] = 0
+        x_velocity[:, :-2] = 0
 
         return x_velocity, y_velocity
 
