@@ -61,12 +61,20 @@ def get_dct2_solution(x_array: np.ndarray,
     """
     x_len, dx = _get_size(x_array, "x_array")
     y_len, dy = _get_size(y_array, "y_array")
-    cos_trans = fftpack.fft2(z_array)
+    cos_trans = fftpack.dctn(z_array, norm='ortho')
     denominator = _get_k_mod(x_len, y_len, dx, dy)
     p_k = cos_trans / denominator
 
     # Handle first wave number where zero is in the denominator
-    idx = np.isinf(p_k)
+    idx = np.isinf(p_k) | np.isnan(p_k)
     p_k[idx] = 0
 
-    return fftpack.ifft2(p_k).real / 2
+    return fftpack.idctn(p_k, norm='ortho')
+
+
+from .plots import plot_contour
+import matplotlib.pyplot as plt
+
+if __name__ == "__main__":
+    fig, ax = plot_contour(x_array=x_array, y_array=y_array, z_array=z_array)
+    plt.show(fig)
