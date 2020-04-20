@@ -121,10 +121,10 @@ class FluidProfile(ABC):
                                     y_velocity: np.ndarray) -> VELOCITY_TUPLES:
         """"""
         y_velocity[:2] = 0
-        y_velocity[:-2] = 0
+        y_velocity[-2:] = 0
 
         x_velocity[:, :2] = 0
-        x_velocity[:, :-2] = 0
+        x_velocity[:, -2:] = 0
 
         return x_velocity, y_velocity
 
