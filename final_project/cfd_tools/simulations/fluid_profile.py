@@ -18,8 +18,8 @@ class Field:
     _dx: np.ndarray = None
 
     def __init__(self,
-                 mesh: np.ndarray,
-                 values: LinearMesh):
+                 mesh: LinearMesh,
+                 values: np.ndarray):
         """"""
         self.values = values
         self.mesh = mesh
