@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_contour(*,
-                 x_array: np.ndarray,
+def plot_contour(x_array: np.ndarray,
                  y_array: np.ndarray,
                  z_array: np.ndarray,
+                 *,
                  title: str = None,
                  x_label: str = None,
                  y_label: str = None) -> plt.subplot:
