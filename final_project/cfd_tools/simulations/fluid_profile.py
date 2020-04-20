@@ -116,8 +116,8 @@ class FluidProfile(ABC):
         self._x_velocity = Field(mesh=self._x_velocity.mesh, values=x_velocity)
         self._y_velocity = Field(mesh=self._y_velocity.mesh, values=y_velocity)
 
-    def _assert_boundary_conditions(self,
-                                    x_velocity: np.ndarray,
+    @staticmethod
+    def _assert_boundary_conditions(x_velocity: np.ndarray,
                                     y_velocity: np.ndarray) -> VELOCITY_TUPLES:
         """"""
         y_velocity[:2] = 0
