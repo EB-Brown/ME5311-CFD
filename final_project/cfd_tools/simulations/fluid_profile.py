@@ -35,7 +35,7 @@ class Field:
     def dy(self) -> np.ndarray:
         if self._dy is None:
             self._dy = \
-                (self.values[:-1, :] - self.values[1:, :]) / self.mesh.y_step
+                (self.values[1:] - self.values[:-1]) / self.mesh.y_step
         return self._dy
 
     @property
