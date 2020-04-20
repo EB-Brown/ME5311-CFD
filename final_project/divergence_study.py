@@ -9,8 +9,8 @@ from cfd_tools import FluidProfile, LinearMesh, plot_contour, Field
 def get_velocity_field(component: np.ndarray, array: np.ndarray) -> np.ndarray:
     rand = np.random.random((len(array), len(component)))
     rand[:, :2] = rand[:, -2:] = 0
-    # rand[0] = rand[-1] = 0
-    rand[:, 2:-2] -= rand[:, 2:-2].mean(axis=0)
+    rand[0] = rand[-1] = 0
+    rand[1:-1, 2:-2] -= rand[1:-1, 2:-2].mean(axis=0)
     return rand
 
 
