@@ -1,3 +1,5 @@
-__all__ = ['FluidProfile', 'Field']
+__all__ = ['FluidProfile', 'Velocity', 'Pressure']
 
-from .fluid_profile import FluidProfile, Field
+from .fluid_profile import FluidProfile
+from .fields import Velocity, Pressure
+
