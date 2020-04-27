@@ -9,10 +9,10 @@ cfl_target = 1.19; % Initial time step calculated from CFL
 time_iterations = 100; % Minimum number of time_iterations
 
 % Number of simulations to run with decreasing time steps
-simulation_iterations = 10;
+simulation_iterations = 50;
 
 % Controls tested dt. ex: .5 will make final tested dt = 0.5 initial dt
-final_dt_scale = 0.5;
+final_dt_scale = 1/10;
 
 x_len = 0.25;
 y_len = 1;
@@ -35,6 +35,9 @@ k_mod = get_k_mod(x_num, y_num, dx, dy);
 % Fill u and v with random numbers
 u_velocity = rand(x_num + 2 * ghost, y_num + 2 * ghost);
 v_velocity = rand(x_num + 2 * ghost, y_num + 2 * ghost);
+
+% Generate temperature
+initial_temperature = abs(rand(x_num, y_num));
 
 % Set boundary condition
 [u_velocity, v_velocity] = boundaries( ...
@@ -59,8 +62,13 @@ initial_kinetic_energy = get_kinetic_energy( ...
 );
 initial_ke_sum = sum(sum(initial_kinetic_energy));
 
-% An array for tracking kinetic energy with respect to dt
+% Calculate initial thermal energy
+initial_thermal_energy = get_thermal_energy(initial_temperature);
+initial_thermal_sum = sum(sum(initial_thermal_energy));
+
+% Arrays for tracking energy with respect to dt
 kinetic_trend = zeros(3, simulation_iterations);
+thermal_trend = zeros(3, simulation_iterations);
 
 %%%%%%%%%%%%%%%%% Time Integration %%%%%%%%%%%%%%%%%
 
@@ -70,8 +78,8 @@ for n=1:simulation_iterations
     dt = initial_dt * factor;
 
     % Run simulation
-    [u_vel, v_vel] = simulate( ...
-        u_velocity, v_velocity, dx, dy, ...
+    [u_vel, v_vel, temperature] = simulate( ...
+        u_velocity, v_velocity, initial_temperature, dx, dy, ...
         dt, 0, end_time, ...
         x_num, y_num, ghost, ...
         k_mod  ...
@@ -83,16 +91,25 @@ for n=1:simulation_iterations
     );
     ke_sum = sum(sum(kinetic_energy));
 
+    thermal_energy = get_thermal_energy(temperature);
+    thermal_sum = sum(sum(thermal_energy));
+
     kinetic_trend(1, n) = dt;
     kinetic_trend(2, n) = abs(ke_sum - initial_ke_sum);
     kinetic_trend(3, n) = ke_sum;
+
+    thermal_trend(1, n) = dt;
+    thermal_trend(2, n) = abs(thermal_sum - initial_thermal_sum);
+    thermal_trend(3, n) = thermal_sum;
 
     fprintf("Progress: %.2d\n", 100 * n / simulation_iterations);
 
 end
 
-fig = kinetic_energy_plot( ...
-    kinetic_trend, initial_ke_sum, "kinetic_energy_convergence.png" ...
+fig = energy_plot( ...
+    kinetic_trend, initial_ke_sum, ...
+    thermal_trend, initial_thermal_sum, ...
+    "energy_convergence.png" ...
 );
 
 disp("Simulations Complete")
