@@ -6,8 +6,7 @@ clc
 x_num = 64;
 y_num = 256;
 cfl_target = 1.1;
-time_iterations = 1000;
-
+time_iterations = 100;
 
 x_len = 0.25;
 y_len = 1;
@@ -15,6 +14,9 @@ y_len = 1;
 ghost = 1; % number  of ghost cells
 
 %%%%%%%%%%%%%%%%% Setup %%%%%%%%%%%%%%%%%
+
+top_wall = ghost + y_num;
+right_wall = ghost + x_num;
 
 dx = x_len/x_num;
 dy = y_len/y_num;
@@ -37,28 +39,45 @@ v_velocity = rand(x_num + 2 * ghost, y_num + 2 * ghost);
 
 %%%%%%%%%%%%%%%%% Time Integration %%%%%%%%%%%%%%%%%
 time = 0;
-subplot(2,1,1)
+subplot(2,2,1)
 contour(u_velocity,100)
 colorbar()
-subplot(2,1,2)
+title("U Velocity")
+subplot(2,2,3)
 contour(v_velocity,100)
+title("V Velocity")
 colorbar()
-pause(0.01)
+% pause(0.01)
 
 dt = cfl_target / ( ...
     max(max(abs(u_velocity)))/dx + max(max(abs(v_velocity)))/dy ...
 );
+initial_kinetic_energy = get_kinetic_energy( ...
+    u_velocity, v_velocity, top_wall, right_wall, ghost ...
+);
+kinetic_trend = zeros(2,time_iterations + 1);
+kinetic_trend(2, 1) = initial_kinetic_energy;
 
 for n=1:time_iterations
+    time = time + dt;
+
     [u_velocity, v_velocity] = time_march( ...
         u_velocity, v_velocity, dx, dy, dt, x_num, y_num, k_mod, ghost ...
     );
 
+    dt = get_next_dt(cfl_target, u_velocity, v_velocity, dx, dy, dt);
+
+    kinetic_energy = get_kinetic_energy( ...
+        u_velocity, v_velocity, top_wall, right_wall, ghost ...
+    );
+    kinetic_change = kinetic_energy - initial_kinetic_energy;
+    kinetic_trend(2, n + 1) = kinetic_energy;
+    kinetic_trend(1, n + 1) = time;
+
+    %{
     diverg = velocity_divergence( ...
         u_velocity, v_velocity, dx, dy, x_num, y_num, ghost ...
     );
-
-    time = time + dt;
 
     fprintf("iteration = %g \n", n);
     fprintf("time step = %g \n", dt);
@@ -66,19 +85,25 @@ for n=1:time_iterations
     fprintf("max divergence = %.2e \n", max(max(abs(diverg))));
     fprintf("max U = %.2f \n", max(max(abs(u_velocity))));
     fprintf("max V = %.2f \n", max(max(abs(v_velocity))));
+    fprintf("Kinetic Change = %.2f \n", kinetic_change);
     fprintf("\n")
-
-    subplot(2,1,1)
-    contour(u_velocity,100)
-    colorbar()
-    title("U Velocity")
-    subplot(2,1,2)
-    contour(v_velocity,100)
-    title("V Velocity")
-    colorbar()
-    
-    dt = get_next_dt(cfl_target, u_velocity, v_velocity, dx, dy, dt);
-
-    pause(0.01)
-
+    %}
 end
+
+subplot(2,2,1)
+contour(u_velocity,100)
+colorbar()
+title("U Velocity")
+subplot(2,2,3)
+contour(v_velocity,100)
+title("V Velocity")
+colorbar()
+subplot(2,2,2)
+plot(kinetic_trend(1, 1:n+1), kinetic_trend(2, 1:n+1));
+title("Kinetic Energy")
+
+disp("Done")
+
+% pause(0.001)
+
+%end
