@@ -6,7 +6,7 @@ clc
 x_num = 64;
 y_num = 256;
 cfl_target = 1.1;
-time_iterations = 100;
+time_iterations = 1000;
 
 x_len = 0.25;
 y_len = 1;
@@ -56,7 +56,7 @@ initial_kinetic_energy = get_kinetic_energy( ...
     u_velocity, v_velocity, top_wall, right_wall, ghost ...
 );
 kinetic_trend = zeros(2,time_iterations + 1);
-kinetic_trend(2, 1) = initial_kinetic_energy;
+kinetic_trend(2, 1) = sum(sum(initial_kinetic_energy));
 
 for n=1:time_iterations
     time = time + dt;
@@ -70,9 +70,9 @@ for n=1:time_iterations
     kinetic_energy = get_kinetic_energy( ...
         u_velocity, v_velocity, top_wall, right_wall, ghost ...
     );
-    kinetic_change = kinetic_energy - initial_kinetic_energy;
-    kinetic_trend(2, n + 1) = kinetic_energy;
     kinetic_trend(1, n + 1) = time;
+    kinetic_trend(2, n + 1) = sum(sum(kinetic_energy));
+    % kinetic_change = kinetic_energy - initial_kinetic_energy;
 
     %{
     diverg = velocity_divergence( ...
@@ -90,17 +90,26 @@ for n=1:time_iterations
     %}
 end
 
-subplot(2,2,1)
-contour(u_velocity,100)
+subplot(2,3,1)
+contour(u_velocity(ghost:ghost + x_num, ghost + 1: ghost + y_num),100)
 colorbar()
 title("U Velocity")
-subplot(2,2,3)
-contour(v_velocity,100)
+caxis([-1, 1])
+subplot(2,3,4)
+contour(v_velocity(ghost + 1:ghost + x_num, ghost: ghost + y_num),100)
 title("V Velocity")
 colorbar()
-subplot(2,2,2)
+caxis([-1, 1])
+subplot(2,3,2)
 plot(kinetic_trend(1, 1:n+1), kinetic_trend(2, 1:n+1));
+title("Total Kinetic Energy")
+subplot(2,3,5)
+plot(kinetic_trend(1, 1:n), diff(kinetic_trend(2, 1:n+1)));
+title("Change in Kinetic Energy")
+subplot(2,3,3)
+contour(kinetic_energy,100)
 title("Kinetic Energy")
+colorbar()
 
 disp("Done")
 
