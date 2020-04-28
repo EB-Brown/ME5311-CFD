@@ -14,8 +14,8 @@ simulation_iterations = 50;
 % Controls tested dt. ex: .5 will make final tested dt = 0.5 initial dt
 final_dt_scale = 1/10;
 
-x_len = 0.25;
-y_len = 1;
+x_len = 0.5;
+y_len = 2;
 
 ghost = 1; % number  of ghost cells
 
@@ -106,10 +106,11 @@ for n=1:simulation_iterations
 
 end
 
+mkdir("plotted_deliverables")
 fig = energy_plot( ...
     kinetic_trend, initial_ke_sum, ...
     thermal_trend, initial_thermal_sum, ...
-    "energy_convergence.png" ...
+    "plotted_deliverables/energy_convergence.png" ...
 );
 
 disp("Simulations Complete")
