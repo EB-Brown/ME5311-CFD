@@ -1,4 +1,4 @@
-function [u_vel, v_vel] = velocity_boundaries(x_num, y_num, ghost, u_vel, v_vel)
+function [u_vel, v_vel] = velocity_boundaries(u_vel, v_vel, x_num, y_num, ghost)
 
     u_vel(ghost,:)=0; % Left - no penetration
     u_vel(x_num+ghost,:)=0; % right - no penetration
