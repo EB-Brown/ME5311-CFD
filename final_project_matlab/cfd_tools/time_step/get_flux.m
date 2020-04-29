@@ -1,11 +1,16 @@
 function [uu_flux, vu_flux, uv_flux, vv_flux, ut_flux, vt_flux] = get_flux( ...
-    u_vel, v_vel, theta, x_num, y_num, ghost ...
+    u_vel, v_vel, temperature, x_num, y_num, ghost ...
 )
 
+% Indexes
+gp1 = ghost + 1;
+right_cell = x_num + ghost;
+top_cell = y_num + ghost;
+
 % Trim off the ghost points
-u = u_vel(ghost:x_num + ghost, ghost + 1:y_num + ghost); % M X N-1
-v = v_vel(ghost + 1:x_num + ghost, ghost:y_num + ghost); % M-1 X N
-% temperature: x_num X y_num
+u = u_vel(ghost:right_cell, gp1:top_cell); % M X N-1
+v = v_vel(gp1:right_cell, ghost:top_cell); % M-1 X N
+theta = temperature(gp1:right_cell, gp1:top_cell);
 
 %%%%%%%%%%%%%%%%%%%%%%% index %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % x_num: M-1
