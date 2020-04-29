@@ -27,7 +27,7 @@ while true
     end
 
     if cfl % CFL is defined, use dynamic dt
-        dt = get_next_dt(cfl_target, u_velocity, v_velocity, dx, dy, dt);
+        dt = get_next_dt(cfl, u_vel, v_vel, dx, dy, dt);
     end
 
 end
