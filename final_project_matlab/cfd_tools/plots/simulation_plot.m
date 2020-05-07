@@ -79,6 +79,7 @@ colorbar()
 ax = subplot(2,3,5);
 ax.Position = [0.38+x_shift,0.05+y_shift,x_size,y_size];
 contourf(theta_x, theta_y, temperature', 100, 'LineStyle', 'none')
+caxis([0,1])
 colormap(autumn)
 title("Theta Temperature")
 colorbar()
