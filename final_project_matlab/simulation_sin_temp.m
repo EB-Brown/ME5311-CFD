@@ -2,11 +2,27 @@ clear all
 clc
 
 %{
+Procedure:
 This simulation initializes the temperature profile with a quarter sin wave. The
 left wall has a fixed temperature of 1 and the right wall has a fixed temperatre
 of 0. The sin wave is defined as sin(pi* x_array / (2 * x_length)) so that the
 fluid temperature toward the left wall approaches 0 and the fluid temperature
 toward the right wall approaches 1.
+
+Hypothesis:
+With the colder portion of the fluid against the hot wall and the hotter portion
+of the fluid against the cold wall, natural convection will begin to develop in
+the counter-clockwise direction. As the fluid along the wall changes its
+temperature, the flow will begin to move in the clockwise direction. The final
+profile will look similar to the `simulation_simple.m` results.
+
+Observations:
+The flow begins to move in the counter-clockwise direction. As the fluid along
+the wall changes its temperature, the flow along the wall begins to move against
+the initial convection direction. Vortex sheets begin to develop. The voertices
+develop in multiple regions and the flow becomes chaotic. The flow settles with
+most of the heat along the top of the domain with minor convection along the
+walls.
 %}
 
 %%%%%%%%%%%%%%%%% Inputs %%%%%%%%%%%%%%%%%
@@ -38,7 +54,8 @@ number_of_plots: The number of plots you would like to generate and save. A
 x_len = 1;
 y_len = 2;
 end_time = 0.01;
-left_wall_temperature = 1; % const or func where 0 <= left_wall_temperature <= 1
+left_wall_temperature = 1;
+right_wall_temperature = 0;
 
 % Dynamic time steps are calculated using the relaxation method
 cfl_target = 0.7;
@@ -46,11 +63,11 @@ cfl_target = 0.7;
 % Number of grid cells
 x_num = 150;
 y_num = 300;
-ghost = 1; % number  of ghost cells
+ghost = 1;
 
 % Simulation Parameters
-prandtl = 0.6; % Prandtl number for air
-rayleigh = 3.5*1e7; % Rayleigh number controls convective driver
+prandtl = 0.6;
+rayleigh = 3.5*1e7;
 
 % Number of plots generated in equal time intervals.
 % Initial and final profiles are included
@@ -97,7 +114,12 @@ end
 
 % Set temperature boundary condition
 temperature = temperature_boundaries( ...
-    temperature, x_num, y_num, ghost, left_wall_temperature ...
+    temperature, ...
+    x_num, ...
+    y_num, ...
+    ghost, ...
+    left_wall_temperature, ...
+    right_wall_temperature ...
 );
 
 % Remove Divergence
@@ -154,7 +176,7 @@ for n=1:iterations
         u_velocity, v_velocity, temperature, dx, dy, ...
         0, cfl_target, time, chunk_end_time, ...
         prandtl, rayleigh, ...
-        x_num, y_num, left_wall_temperature, ...
+        x_num, y_num, left_wall_temperature, right_wall_temperature,...
         ghost, k_mod  ...
     );
 

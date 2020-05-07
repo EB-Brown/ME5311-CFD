@@ -2,7 +2,16 @@ clear all
 clc
 
 %{
+Procedure:
 This simulation initializes the temperature profile with a constant value of 0.5
+
+Hypothesis:
+With the hot wall set on the left side and cold wall set on the right wall,
+natural convection will develop causing the flow to move in the clockwise
+direction.
+
+Observations:
+The flow moves in the clockwise direction.
 %}
 
 %%%%%%%%%%%%%%%%% Inputs %%%%%%%%%%%%%%%%%
@@ -34,7 +43,8 @@ number_of_plots: The number of plots you would like to generate and save. A
 x_len = 0.5;
 y_len = 2;
 end_time = 0.01;
-left_wall_temperature = 1; % const or func where 0 <= left_wall_temperature <= 1
+left_wall_temperature = 1;
+right_wall_temperature = 0;
 
 % Dynamic time steps are calculated using the relaxation method
 cfl_target = 0.5;
@@ -42,11 +52,11 @@ cfl_target = 0.5;
 % Number of grid cells
 x_num = 50;
 y_num = 200;
-ghost = 1; % number  of ghost cells
+ghost = 1;
 
 % Simulation Parameters
-prandtl = 0.7; % Prandtl number for air
-rayleigh = 1e6; % Rayleigh number controls convective driver
+prandtl = 0.7;
+rayleigh = 1e6;
 
 % Number of plots generated in equal time intervals.
 % Initial and final profiles are included
@@ -89,7 +99,12 @@ temperature = zeros(x_num + 2 * ghost, y_num + 2 * ghost) + 0.5;
 
 % Set temperature boundary condition
 temperature = temperature_boundaries( ...
-    temperature, x_num, y_num, ghost, left_wall_temperature ...
+    temperature, ...
+    x_num, ...
+    y_num, ...
+    ghost, ...
+    left_wall_temperature, ...
+    right_wall_temperature ...
 );
 
 % Remove Divergence
@@ -145,7 +160,7 @@ for n=1:iterations
         u_velocity, v_velocity, temperature, dx, dy, ...
         0, cfl_target, time, chunk_end_time, ...
         prandtl, rayleigh, ...
-        x_num, y_num, left_wall_temperature, ...
+        x_num, y_num, left_wall_temperature, right_wall_temperature,...
         ghost, k_mod  ...
     );
 

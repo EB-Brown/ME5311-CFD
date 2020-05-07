@@ -1,5 +1,5 @@
 function temperature = temperature_boundaries( ...
-    temperature, x_num, y_num, ghost, left_condition ...
+    temperature, x_num, y_num, ghost, left_condition, right_condition ...
 )
 
 % Averages are manipulated due to staggered grid
@@ -12,7 +12,8 @@ temperature(:, ghost + y_num + 1) = temperature(:, ghost + y_num); % Top
 temperature(ghost, :) = 2 * left_condition - temperature(ghost + 1, :);
 
 % Right wall = 0
-temperature(ghost + x_num + 1, :) = -1 * temperature(ghost + x_num, :);
+temperature(ghost + x_num + 1, :) = ...
+    2 * right_condition - temperature(ghost + x_num, :);
 
 end
 
