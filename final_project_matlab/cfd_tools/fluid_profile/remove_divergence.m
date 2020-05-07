@@ -18,4 +18,6 @@ v_vel(ghost+1:x_num+ghost,ghost+1:y_num+ghost-1) = ...
     v_vel(ghost+1:x_num+ghost,ghost+1:y_num+ghost-1) ...
     - pressure_dy(press, dy, x_num, y_num, ghost);
 
+[u_vel, v_vel] = velocity_boundaries(u_vel, v_vel, x_num, y_num, ghost);
+
 end
