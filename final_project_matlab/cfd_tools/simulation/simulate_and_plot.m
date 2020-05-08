@@ -52,6 +52,7 @@ thermal_energy = thermal_energy(gp1:right_wall, gp1:top_wall);
 % Check if initial
 if current_plot_number
     start_condition = "_time_" + num2str(start_time, "%.3g");
+    start_condition = replace(start_condition, ".", "p") + ".png";
 else
     start_condition = "_initial_condition.png";
 end
