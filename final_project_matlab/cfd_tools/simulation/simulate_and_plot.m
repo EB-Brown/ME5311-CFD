@@ -69,8 +69,8 @@ simulation_plot( ...
     file_name ...
 );
 
-iterations = number_of_plots - 1;
-time_chunk = end_time / iterations;
+iterations = number_of_plots - current_plot_number - 1;
+time_chunk = (end_time - start_time) / iterations;
 current_time = start_time;
 
 %%%%%%%%%%%%%%%%%%%% Advance Simulation %%%%%%%%%%%%%%%%%%%%%%
