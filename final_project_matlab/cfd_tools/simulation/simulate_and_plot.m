@@ -34,7 +34,6 @@ v_y = 0:dy:y_len;
 theta_x = v_x;
 theta_y = u_y;
 
-
 % Calculate initial divergence
 vel_divergence = velocity_divergence( ...
     u_vel, v_vel, dx, dy, x_num, y_num, ghost ...

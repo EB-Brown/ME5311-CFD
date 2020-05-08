@@ -52,8 +52,8 @@ end
 total_sims = size(simulations, 2);
 
 flip_time = end_time;
-total_time_for_flip = 3 * end_time;
-total_plots_for_flip = 3 * number_of_plots;
+total_time_for_flip = 2 * end_time;
+total_plots_for_flip = 2 * number_of_plots;
 
 %%%%%%%%%%% Running simulations %%%%%%%%%%%
 progress = 0;
