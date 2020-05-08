@@ -18,21 +18,21 @@ numbers, and rayleigh numbers, then run simulations on each combination storing
 the results under the "plots" folder under the following directory structure:
 
     domain/prandtl_rayleigh/simulation
+
 %}
 
 %%%%%%%%%%% Inputs %%%%%%%%%%%%%
 domains = [ ... [x length, y length, x grid cells, y grid cells]
     [0.75, 2, 75, 200]; ...
-    [2, 2, 150, 150]; ...
-    [2, 1, 200, 100]; ...
+%    [2, 2, 150, 150]; ...
 ];
 
-prandtl_numbers = [0.7, 4];
-rayleigh_numbers = [1e4, 1e8];
+prandtl_numbers = [1.5]; % [0.7, 4];
+rayleigh_numbers = [5*1e6]; % [1e4, 1e8];
 
 end_time = 0.01; % Total run time for simple and sine, flip time for temp_flip
-cfl_target = 0.3;
-number_of_plots = 10;
+cfl_target = 0.45;
+number_of_plots = 4;
 
 %%%%%%%%%%% Setup %%%%%%%%%%%
 simulations = zeros( ...
