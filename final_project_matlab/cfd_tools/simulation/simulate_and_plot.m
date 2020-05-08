@@ -49,9 +49,15 @@ kinetic_energy = get_kinetic_energy( ...
 thermal_energy = get_thermal_energy(theta);
 thermal_energy = thermal_energy(gp1:right_wall, gp1:top_wall);
 
+% Check if initial
+if current_plot_number
+    start_condition = "_time_" + num2str(start_time, "%.3g");
+else
+    start_condition = "_initial_condition.png";
+end
+
 % plot initial condition
-file_name = output_dir + "/" + num2str(current_plot_number) ...
-    + "_initial_condition.png";
+file_name = output_dir + "/" + num2str(current_plot_number) + start_condition;
 simulation_plot( ...
     u_vel, u_x, u_y, ...
     v_vel, v_x, v_y, ...
@@ -70,7 +76,7 @@ current_time = start_time;
 
 for n=1:iterations
 
-    chunk_end_time = n * time_chunk;
+    chunk_end_time = start_time + n * time_chunk;
 
     [u_vel, v_vel, theta, heat_flux, time] = simulate( ...
         u_vel, v_vel, theta, heat_flux, dx, dy, ...
