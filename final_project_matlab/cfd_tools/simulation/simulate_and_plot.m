@@ -15,6 +15,7 @@ try
     plot_final_state;
 catch
     plot_final_state = 1;
+end
 % Create output directory
 mkdir(output_dir)
 
