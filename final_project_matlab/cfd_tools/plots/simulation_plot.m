@@ -31,7 +31,7 @@ end
 
 fig = figure(1);
 fig.Units = "inches";
-fig.Position = [0, 0, 14, 8];
+fig.Position = [2, 0.5, 14, 8];
 clf(fig,'reset');
 annotation( ...
     'textbox', [0.3954,0.975,0.21,0], ...

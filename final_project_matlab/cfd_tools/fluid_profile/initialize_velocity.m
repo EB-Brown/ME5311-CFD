@@ -1,0 +1,19 @@
+function [u_velocity, v_velocity] = initialize_velocity( ...
+    x_num, y_num, dx, dy, k_mod, ghost ...
+)
+
+% Fill u, v, and temperature with random numbers
+u_velocity = zeros(x_num + 2 * ghost, y_num + 2 * ghost);
+v_velocity = zeros(x_num + 2 * ghost, y_num + 2 * ghost);
+
+% Set velocity boundary condition
+[u_velocity, v_velocity] = velocity_boundaries( ...
+    u_velocity, v_velocity, x_num, y_num, ghost ...
+);
+
+% Remove Divergence
+[u_velocity, v_velocity] = remove_divergence( ...
+    u_velocity, v_velocity, dx, dy, x_num, y_num, k_mod, ghost ...
+);
+
+end
