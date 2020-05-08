@@ -1,23 +1,24 @@
-function [u_vel, v_vel, theta, heat_flux, time] = simulation_temp_flip( ...
+function [u_vel, v_vel, theta, heat_flux, time] = simulation_sine_temp( ...
     x_len, y_len, x_num, y_num, ...
-    flip_time, total_time, cfl_target, ...
+    end_time, cfl_target, ...
     prandtl, rayleigh, ...
     number_of_plots ...
 )
 
 %{
-Purpose:
-The objective of this simulation is to begin with repeating the
-`simple_simulation.m` procedure until t = flip_time. Then the temperature
-boundaries instantaneously switch walls and continue until t = total_time.
+Procedure:
+This simulation initializes the temperature profile with a quarter sin wave. The
+left wall has a fixed temperature of 1 and the right wall has a fixed temperatre
+of 0. The sin wave is defined as sin(pi* x_array / (2 * x_length)) so that the
+fluid temperature toward the left wall approaches 0 and the fluid temperature
+toward the right wall approaches 1.
 
 PARAMETERS
 x_len: the length of the domain in the x direction
 y_len: the length of the domain in the y direction
 x_num: Number of grid cells in the x direction
 y_num: Number of grid cells in the y direction
-total_time: the amount of time the simulation will run for
-flip_time: the time when the temperature domain will switch
+end_time: the amount of time the simulation will run for
 cfl_target: The target CFL for controlling the time step size
 prandtl: The Prandtl number for the simulation
 rayleigh: The Rayleigh number for the simulation (Requires adjusting
@@ -49,8 +50,18 @@ k_mod = get_k_mod(x_num, y_num, dx, dy);
     x_num, y_num, dx, dy, k_mod, ghost ...
 );
 
-%Initialize temperature as as constant value
-theta = zeros(x_num + 2 * ghost, y_num + 2 * ghost) + 0.5;
+% Initial horizontal temperature profile
+top_wall = ghost + y_num;
+theta_x = dx/2:dx:x_len-dx/2;
+init_temp = sin(pi*theta_x / (2*x_len));
+
+% Assign profile to each row of temperature
+gp1 = ghost + 1;
+right_wall = ghost + x_num;
+theta = zeros(x_num + 2 * ghost, y_num + 2 * ghost);
+for row=ghost+1:top_wall
+    theta(gp1:right_wall, row) = init_temp;
+end
 
 % Set temperature boundary condition
 theta = temperature_boundaries( ...
@@ -62,11 +73,6 @@ heat_flux.left = [];
 heat_flux.right = [];
 time = [];
 
-% Divide plots between simpile simulation and flipped
-total_iterations = number_of_plots - 1;
-percent_simple = flip_time / total_time;
-simple_iterations = floor(total_iterations * percent_simple);
-
 %%%%%%%%%%%%%%%%% Output directory %%%%%%%%%%%%%%%%%
 domain = "/x_len_" + num2str(x_len, "%.2g") ...
     + "__y_len_" + num2str(y_len, "%.2g");
@@ -76,26 +82,15 @@ scaled_parms = "/pr_" + num2str(prandtl, "%.2e") ...
     + "__ra_" + num2str(rayleigh, "%.2e");
 scaled_parms = replace(replace(scaled_parms, ".", "p"), "+", "");
 
-output_dir = "plots/" + domain + scaled_parms + "/flip_temp_conditions";
+output_dir = "plots/" + domain + scaled_parms + "/sine_temp_conditions";
 
-%%%%%%%%%%%%%%%%% Simple Simulation %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Simulation %%%%%%%%%%%%%%%%%
 [u_vel, v_vel, theta, heat_flux, time] = simulate_and_plot( ...
     x_len, y_len, x_num, y_num, dx, dy, k_mod, ghost, ...
     u_vel, v_vel, theta, ...
     left_wall_temp, right_wall_temp, heat_flux, ...
-    cfl_target, time, 0, flip_time, ...
-    simple_iterations, 0, ...
-    prandtl, rayleigh, ...
-    output_dir, 0 ...
-);
-
-%%%%%%%%%%%%%%%%% Flipped Temperature %%%%%%%%%%%%%%%%%
-[u_vel, v_vel, theta, heat_flux, time] = simulate_and_plot( ...
-    x_len, y_len, x_num, y_num, dx, dy, k_mod, ghost, ...
-    u_vel, v_vel, theta, ...
-    right_wall_temp, left_wall_temp, heat_flux, ... flipped temperature
-    cfl_target, time, max(time), total_time, ...
-    number_of_plots, simple_iterations, ...
+    cfl_target, time, 0, end_time, ...
+    number_of_plots, 0, ...
     prandtl, rayleigh, ...
     output_dir ...
 );
